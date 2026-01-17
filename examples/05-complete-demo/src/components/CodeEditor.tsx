@@ -175,9 +175,10 @@ export class CodeEditor extends Rect {
       <Rect
         width={() => this.width() - 120}
         height={() => this.height() - titleBarHeight - tabHeight - 40}
-        fill="transparent"
+        fill="rgba(0, 0, 0, 0)"
         x={30}
         y={() => (titleBarHeight + tabHeight) / 2 + 10}
+        clip
       >
         {props?.children}
       </Rect>

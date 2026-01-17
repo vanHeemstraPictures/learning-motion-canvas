@@ -2,6 +2,7 @@ import {Rect, Txt, Circle} from '@motion-canvas/2d/lib/components';
 import {initial, signal} from '@motion-canvas/2d/lib/decorators';
 import {SignalValue, SimpleSignal} from '@motion-canvas/core/lib/signals';
 import {ComponentChildren} from '@motion-canvas/2d/lib/components';
+import {createRef} from '@motion-canvas/core/lib/utils';
 
 export interface TerminalProps {
   width?: SignalValue<number>;
@@ -18,6 +19,8 @@ export interface TerminalProps {
 }
 
 export class Terminal extends Rect {
+  private readonly contentContainerRef = createRef<Rect>();
+
   @initial('#2d2d2d')
   @signal()
   public declare readonly titleBarColor: SimpleSignal<string, this>;
@@ -29,6 +32,10 @@ export class Terminal extends Rect {
   @initial('Terminal')
   @signal()
   public declare readonly terminalTitle: SimpleSignal<string, this>;
+
+  public contentContainer(): Rect {
+    return this.contentContainerRef();
+  }
 
   public constructor(props?: TerminalProps) {
     super({
@@ -86,10 +93,12 @@ export class Terminal extends Rect {
     // Content area with padding
     this.add(
       <Rect
+        ref={this.contentContainerRef}
         width={() => this.width() - 40}
         height={() => this.height() - titleBarHeight - 40}
-        fill="transparent"
+        fill="rgba(0, 0, 0, 0)"
         y={titleBarHeight / 2}
+        clip
       >
         {props?.children}
       </Rect>

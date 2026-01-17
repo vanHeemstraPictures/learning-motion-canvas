@@ -1,73 +1,92 @@
 import {makeScene2D} from '@motion-canvas/2d';
 import {Rect, Txt} from '@motion-canvas/2d/lib/components';
-import {all, waitFor} from '@motion-canvas/core/lib/flow';
+import {all, loop, waitFor} from '@motion-canvas/core/lib/flow';
 import {createRef, makeRef, useRandom} from '@motion-canvas/core/lib/utils';
 import {slideTransition} from '@motion-canvas/core/lib/transitions';
 import {Direction} from '@motion-canvas/core/lib/types';
 import {Terminal} from '../components/Terminal';
 
 export default makeScene2D(function* (view) {
+  // Transition INTO this scene: previous scene slides out left, this one comes in.
+  yield* slideTransition(Direction.Left, 1);
+
   const random = useRandom();
   const terminal = createRef<Terminal>();
   const prompt = createRef<Txt>();
   const command = createRef<Txt>();
   const output = createRef<Txt>();
   const cursor = createRef<Rect>();
+  const leftX = -560;
+  const promptGap = 12;
 
   view.add(
-    <Terminal
-      ref={terminal}
-      width={1200}
-      height={700}
-      scale={0.8}
-      opacity={0}
-    >
-      {/* Command prompt */}
-      <Txt
-        ref={prompt}
-        fill="#26a269"
-        fontSize={24}
-        fontFamily="JetBrains Mono, monospace"
-        fontWeight={600}
-        x={-560}
-        y={-280}
-        text=""
-      />
-
-      {/* Command text */}
-      <Txt
-        ref={command}
-        fill="#ffffff"
-        fontSize={24}
-        fontFamily="JetBrains Mono, monospace"
-        x={-460}
-        y={-280}
-        text=""
-      />
-
-      {/* Blinking cursor */}
+    <>
+      {/* Solid canvas background (so the editor doesn't show transparency grid) */}
       <Rect
-        ref={cursor}
-        width={12}
-        height={28}
-        fill="#ffffff"
-        x={-460}
-        y={-280}
-        opacity={1}
+        // Overscan so slide transitions never reveal transparent pixels.
+        width={'300%'}
+        height={'300%'}
+        fill="#0b1020"
+        zIndex={-100}
       />
 
-      {/* Command output */}
-      <Txt
-        ref={output}
-        fill="#cccccc"
-        fontSize={20}
-        fontFamily="JetBrains Mono, monospace"
-        x={-560}
-        y={-200}
-        text=""
-        textAlign="left"
-      />
-    </Terminal>
+      <Terminal
+        ref={terminal}
+        width={1200}
+        height={700}
+        scale={0.8}
+        opacity={0}
+      >
+        {/* Command prompt */}
+        <Txt
+          ref={prompt}
+          fill="#26a269"
+          fontSize={24}
+          fontFamily="JetBrains Mono, monospace"
+          fontWeight={600}
+          offsetX={-1}
+          x={leftX}
+          y={-280}
+          text=""
+        />
+
+        {/* Command text */}
+        <Txt
+          ref={command}
+          fill="#ffffff"
+          fontSize={24}
+          fontFamily="JetBrains Mono, monospace"
+          offsetX={-1}
+          x={() => prompt().x() + prompt().width() + promptGap}
+          y={-280}
+          text=""
+        />
+
+        {/* Blinking cursor */}
+        <Rect
+          ref={cursor}
+          width={12}
+          height={28}
+          fill="#ffffff"
+          x={() => command().x() + command().width() + 6}
+          y={-280}
+          opacity={1}
+        />
+
+        {/* Command output */}
+        <Txt
+          ref={output}
+          fill="#cccccc"
+          fontSize={20}
+          fontFamily="JetBrains Mono, monospace"
+          offsetX={-1}
+          x={leftX}
+          y={-200}
+          text=""
+          textAlign="left"
+        />
+      </Terminal>
+    </>
   );
 
   // Fade in terminal
@@ -86,10 +105,7 @@ export default makeScene2D(function* (view) {
   yield blinkCursor(cursor);
 
   // Type command
-  yield* typeText(command, ' kubectl get pods -n production', 2);
-  
-  // Update cursor position
-  cursor().x(220);
+  yield* typeText(command, 'kubectl get pods -n production', 2);
   yield* waitFor(0.5);
 
   // Stop cursor, show output
@@ -110,7 +126,7 @@ redis-cache-8f7c6d-m9p3k     1/1     Running   0          7d`;
   const command2 = createRef<Txt>();
   const cursor2 = createRef<Rect>();
 
-  terminal().add(
+  terminal().contentContainer().add(
     <>
       <Txt
         ref={prompt2}
@@ -118,7 +134,8 @@ redis-cache-8f7c6d-m9p3k     1/1     Running   0          7d`;
         fontSize={24}
         fontFamily="JetBrains Mono, monospace"
         fontWeight={600}
-        x={-560}
+        offsetX={-1}
+        x={leftX}
         y={60}
         text=""
       />
@@ -127,7 +144,8 @@ redis-cache-8f7c6d-m9p3k     1/1     Running   0          7d`;
         fill="#ffffff"
         fontSize={24}
         fontFamily="JetBrains Mono, monospace"
-        x={-460}
+        offsetX={-1}
+        x={() => prompt2().x() + prompt2().width() + promptGap}
         y={60}
         text=""
       />
@@ -136,7 +154,7 @@ redis-cache-8f7c6d-m9p3k     1/1     Running   0          7d`;
         width={12}
         height={28}
         fill="#ffffff"
-        x={-460}
+        x={() => command2().x() + command2().width() + 6}
         y={60}
         opacity={1}
       />
@@ -145,19 +163,18 @@ redis-cache-8f7c6d-m9p3k     1/1     Running   0          7d`;
 
   yield* typeText(prompt2, 'willem@cloud-engineer:~$', 0.6);
   yield blinkCursor(cursor2);
-  yield* typeText(command2, ' docker ps', 1.2);
-  
-  cursor2().x(-330);
+  yield* typeText(command2, 'docker ps', 1.2);
   yield* waitFor(0.5);
 
   const output2 = createRef<Txt>();
-  terminal().add(
+  terminal().contentContainer().add(
     <Txt
       ref={output2}
       fill="#cccccc"
       fontSize={20}
       fontFamily="JetBrains Mono, monospace"
-      x={-560}
+      offsetX={-1}
+      x={leftX}
       y={120}
       text=""
       textAlign="left"
@@ -173,9 +190,6 @@ b7f3e2c8a9d1   postgres:14      Up 3 hours     0.0.0.0:5432->5432/tcp`;
 
   yield* typeText(output2, dockerOutput, 2.5);
   yield* waitFor(2);
-
-  // Transition to next scene
-  yield* slideTransition(Direction.Left, 1);
 });
 
 // Helper function for typing effect
@@ -190,7 +204,7 @@ function* typeText(textNode: any, fullText: string, duration: number) {
 // Helper function for cursor blinking
 function* blinkCursor(cursor: any) {
   cursor().opacity(1, 0);
-  yield* all(
-    cursor().opacity(0, 0.5).to(1, 0.5).loop()
-  );
+  // Tween chains don't have `.loop()` in this Motion Canvas version.
+  // `loop(...)` never finishes, so start it concurrently using `yield` (not `yield*`).
+  yield loop(() => cursor().opacity(0, 0.5).to(1, 0.5));
 }

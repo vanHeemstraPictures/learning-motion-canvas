@@ -4,19 +4,18 @@
   "description": "Complete Motion Canvas demo featuring terminal and code animations",
   "type": "module",
   "scripts": {
-    "serve": "motion-canvas serve ./src/project.ts",
-    "build": "motion-canvas build ./src/project.ts",
-    "render": "motion-canvas render ./src/project.ts"
+    "serve": "vite",
+    "build": "vite build",
+    "render": "node ./scripts/render.mjs"
   },
   "author": "Willem van Heemstra",
   "license": "MIT",
   "devDependencies": {
     "@motion-canvas/2d": "^3.15.0",
     "@motion-canvas/core": "^3.15.0",
+    "@motion-canvas/ui": "^3.15.0",
+    "@motion-canvas/vite-plugin": "^3.15.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.0"
-  },
-  "dependencies": {
-    "@motion-canvas/cli": "^3.15.0"
   }
 }

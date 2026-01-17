@@ -7,6 +7,7 @@
     "types": ["vite/client"],
     "jsx": "react-jsx",
     "jsxImportSource": "@motion-canvas/2d/lib",
+    "experimentalDecorators": true,
     
     "strict": true,
     "esModuleInterop": true,

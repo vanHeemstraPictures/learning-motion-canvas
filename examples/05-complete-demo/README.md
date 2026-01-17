@@ -54,6 +54,10 @@ npm run build
 npm run render
 ```
 
+> Note: Rendering is not configured in this demo because the old `@motion-canvas/cli`
+> package (which previously provided `motion-canvas render`) is no longer available on npm.
+> Interactive development via `npm run serve` works normally.
+
 ## Project Structure
 
 ```

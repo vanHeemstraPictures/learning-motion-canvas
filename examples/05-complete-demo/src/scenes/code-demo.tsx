@@ -7,12 +7,24 @@ import {slideTransition} from '@motion-canvas/core/lib/transitions';
 import {Direction} from '@motion-canvas/core/lib/types';
 
 export default makeScene2D(function* (view) {
+  // Transition INTO this scene: previous scene slides out left, this one comes in.
+  yield* slideTransition(Direction.Left, 1);
+
   const editor = createRef<CodeEditor>();
   const codeBlock = createRef<Code>();
   const title = createRef<Txt>();
 
   view.add(
     <>
+      {/* Solid canvas background (so the editor doesn't show transparency grid) */}
+      <Rect
+        // Overscan so slide transitions never reveal transparent pixels.
+        width={'300%'}
+        height={'300%'}
+        fill="#0b1020"
+        zIndex={-100}
+      />
+
       {/* Scene title */}
       <Txt
         ref={title}
@@ -41,8 +53,12 @@ export default makeScene2D(function* (view) {
           fontFamily="JetBrains Mono, monospace"
           language="typescript"
           code={''}
-          x={-650}
-          y={-320}
+          // Anchor to top-left so code grows down/right inside the editor window.
+          offsetX={-1}
+          offsetY={-1}
+          // Position inside the editor's content area (not the window origin).
+          x={() => -(editor().width() - 120) / 2 + 20}
+          y={() => -((editor().height() - 45 - 35 - 40) / 2) + 20}
         />
       </CodeEditor>
     </>

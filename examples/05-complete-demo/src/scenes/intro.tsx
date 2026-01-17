@@ -1,9 +1,7 @@
 import {makeScene2D} from '@motion-canvas/2d';
 import {Circle, Rect, Txt} from '@motion-canvas/2d/lib/components';
-import {all, waitFor} from '@motion-canvas/core/lib/flow';
+import {loop, waitFor} from '@motion-canvas/core/lib/flow';
 import {createRef} from '@motion-canvas/core/lib/utils';
-import {slideTransition} from '@motion-canvas/core/lib/transitions';
-import {Direction} from '@motion-canvas/core/lib/types';
 
 export default makeScene2D(function* (view) {
   const title = createRef<Txt>();
@@ -14,6 +12,15 @@ export default makeScene2D(function* (view) {
 
   view.add(
     <>
+      {/* Solid canvas background (so the editor doesn't show transparency grid) */}
+      <Rect
+        // Overscan so slide transitions never reveal transparent pixels.
+        width={'300%'}
+        height={'300%'}
+        fill="#0b1020"
+        zIndex={-100}
+      />
+
       {/* Background circles */}
       <Circle
         ref={circle1}
@@ -68,11 +75,10 @@ export default makeScene2D(function* (view) {
   );
 
   // Animate background circles
-  yield* all(
-    circle1().scale(0.8, 2).to(1.2, 2).to(0.8, 2).loop(),
-    circle2().scale(1.2, 2.5).to(0.9, 2.5).to(1.2, 2.5).loop(),
-    circle3().scale(1, 1.8).to(1.1, 1.8).to(1, 1.8).loop(),
-  );
+  // `loop(...)` never finishes, so run it concurrently using `yield` (not `yield*`).
+  yield loop(() => circle1().scale(0.8, 2).to(1.2, 2).to(0.8, 2));
+  yield loop(() => circle2().scale(1.2, 2.5).to(0.9, 2.5).to(1.2, 2.5));
+  yield loop(() => circle3().scale(1, 1.8).to(1.1, 1.8).to(1, 1.8));
 
   // Fade in title
   yield* title().opacity(1, 1);
@@ -81,7 +87,4 @@ export default makeScene2D(function* (view) {
   // Fade in subtitle
   yield* subtitle().opacity(1, 1);
   yield* waitFor(2);
-
-  // Slide transition to next scene
-  yield* slideTransition(Direction.Left, 1);
 });
