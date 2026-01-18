@@ -98,7 +98,7 @@ export default makeScene2D(function* (view) {
   yield* waitFor(0.5);
 
   // Show prompt
-  yield* typeText(prompt, 'willem@cloud-engineer:~$', 0.8);
+  yield* typeText(prompt, 'cloud-engineer@platform:~$', 0.8);
   yield* waitFor(0.3);
 
   // Start cursor blinking
@@ -161,7 +161,7 @@ redis-cache-8f7c6d-m9p3k     1/1     Running   0          7d`;
     </>
   );
 
-  yield* typeText(prompt2, 'willem@cloud-engineer:~$', 0.6);
+  yield* typeText(prompt2, 'cloud-engineer@platform:~$', 0.6);
   yield blinkCursor(cursor2);
   yield* typeText(command2, 'docker ps', 1.2);
   yield* waitFor(0.5);
